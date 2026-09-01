@@ -10,6 +10,8 @@ import {
   RotateCcw,
   Trash2,
   CheckCircle2,
+  LogOut,
+  UserCheck,
 } from 'lucide-react';
 
 interface SettingsScreenProps {
@@ -19,6 +21,7 @@ interface SettingsScreenProps {
   onResetSampleData: () => void;
   onClearAllData: () => void;
   onImportData: (engagements: EngagementRecord[]) => void;
+  onLogout?: () => void;
 }
 
 export function SettingsScreen({
@@ -28,6 +31,7 @@ export function SettingsScreen({
   onResetSampleData,
   onClearAllData,
   onImportData,
+  onLogout,
 }: SettingsScreenProps) {
   const [name, setName] = useState(user.name);
   const [phone, setPhone] = useState(user.phone);
@@ -109,10 +113,23 @@ export function SettingsScreen({
 
       {/* Profile Form */}
       <form onSubmit={handleSave} className="gold-card p-5 space-y-4 mb-6">
-        <h3 className="font-serif-gold text-sm sm:text-base font-bold text-[#f1ca63] uppercase m-0 flex items-center gap-2">
-          <User className="w-4 h-4 text-[#f1ca63]" strokeWidth={1.5} />
-          USER & ACCOUNTABILITY PROFILE
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="font-serif-gold text-sm sm:text-base font-bold text-[#f1ca63] uppercase m-0 flex items-center gap-2">
+            <User className="w-4 h-4 text-[#f1ca63]" strokeWidth={1.5} />
+            USER & ACCOUNTABILITY PROFILE
+          </h3>
+          {onLogout && (
+            <button
+              type="button"
+              id="settings-logout-btn"
+              onClick={onLogout}
+              className="text-xs font-bold text-[#f1ca63] hover:underline flex items-center gap-1 cursor-pointer bg-[#02050c] px-2.5 py-1 rounded border border-[#765b24]/60"
+            >
+              <LogOut className="w-3 h-3" />
+              Switch Account / Log Out
+            </button>
+          )}
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -167,12 +184,18 @@ export function SettingsScreen({
           </div>
         </div>
 
-        <button
-          type="submit"
-          className="btn-gold py-2 px-5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md mt-2"
-        >
-          Save Changes
-        </button>
+        <div className="flex items-center justify-between pt-2">
+          <button
+            type="submit"
+            className="btn-gold py-2 px-5 rounded text-xs font-bold uppercase tracking-wider cursor-pointer shadow-md"
+          >
+            Save Changes
+          </button>
+          <div className="flex items-center gap-1.5 text-xs text-[#b9b7ad]">
+            <UserCheck className="w-3.5 h-3.5 text-[#f1ca63]" />
+            <span>Active: <strong className="text-[#f1ca63]">{user.name}</strong></span>
+          </div>
+        </div>
       </form>
 
       {/* Data Management Card */}

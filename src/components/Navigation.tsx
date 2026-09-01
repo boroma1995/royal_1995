@@ -10,6 +10,9 @@ import {
   PlusCircle,
   FileText,
   Settings,
+  User,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -19,6 +22,9 @@ interface HeaderProps {
   onSetViewMode: (mode: ViewMode) => void;
   onNavigate: (step: FlowStep) => void;
   streakDays: number;
+  isAuthenticated?: boolean;
+  onOpenAuthModal?: () => void;
+  onLogout?: () => void;
 }
 
 export function Header({
@@ -28,6 +34,9 @@ export function Header({
   onSetViewMode,
   onNavigate,
   streakDays,
+  isAuthenticated = true,
+  onOpenAuthModal,
+  onLogout,
 }: HeaderProps) {
   const isLogging = [
     'score',
@@ -54,11 +63,35 @@ export function Header({
           <div className="flex items-center justify-center transition-transform group-hover:scale-105">
             <LionCrest size={40} glow={false} className="sm:w-[46px] sm:h-[46px]" />
           </div>
-          <div className="flex items-center">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <span className="inline-flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-[10px] uppercase font-bold tracking-wider bg-[#030814] text-[#f1ca63] px-2.5 sm:px-3 py-1 rounded-full border border-[#8b681f]/70 shadow-sm whitespace-nowrap">
               <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#f1ca63]" strokeWidth={1.5} />
               {streakDays}d Streak
             </span>
+
+            {/* User Account Chip */}
+            {isAuthenticated ? (
+              <button
+                type="button"
+                id="header-user-account-btn"
+                title={`Logged in as ${user.name}. Click to switch user or log out.`}
+                onClick={onOpenAuthModal}
+                className="hidden lg:inline-flex items-center gap-1.5 text-[10px] font-bold text-[#e6c866] bg-[#030814] px-2.5 py-1 rounded-full border border-[#8b681f]/60 hover:border-[#f1ca63] transition-colors cursor-pointer"
+              >
+                <User className="w-3 h-3 text-[#f1ca63]" strokeWidth={1.5} />
+                <span className="max-w-[110px] truncate">{user.name || 'Account'}</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                id="header-login-btn"
+                onClick={onOpenAuthModal}
+                className="inline-flex items-center gap-1 text-[10px] font-bold text-[#090d10] bg-gradient-to-r from-[#c9982c] to-[#805c18] px-2.5 py-1 rounded-full border border-[#f0c65c] shadow-sm hover:brightness-110 cursor-pointer"
+              >
+                <LogIn className="w-3 h-3" />
+                Sign In
+              </button>
+            )}
           </div>
         </div>
 
@@ -158,6 +191,19 @@ export function Header({
               <span className="hidden sm:inline">14 Screens</span>
             </button>
           </div>
+
+          {/* Quick Log Out button on desktop if authenticated */}
+          {isAuthenticated && onLogout && (
+            <button
+              type="button"
+              id="header-logout-btn"
+              title="Log Out & Switch User"
+              onClick={onLogout}
+              className="hidden xl:flex items-center gap-1 p-2 rounded-lg bg-[#030814] border border-[#8b681f]/60 text-[#b9b7ad] hover:text-[#f1ca63] hover:border-[#f1ca63] transition-colors cursor-pointer text-xs"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
       </header>
 

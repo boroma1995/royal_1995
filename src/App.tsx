@@ -11,6 +11,7 @@ import { INITIAL_ENGAGEMENTS, INITIAL_USER, SCORE_OPTIONS } from './data/constan
 import { Header, BottomNavBar } from './components/Navigation';
 import { PhoneSimulator } from './components/PhoneSimulator';
 import { ShowcaseView } from './components/ShowcaseView';
+import { AuthModal } from './components/AuthModal';
 import { RegisterScreen } from './components/Screens/RegisterScreen';
 import { HomeScreen } from './components/Screens/HomeScreen';
 import { ScoreScreen } from './components/Screens/ScoreScreen';
@@ -56,6 +57,24 @@ export default function App() {
     }
   });
 
+  // Auth State: Defaults to false on clean starts unless explicitly authenticated in session
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('lookaway_authenticated') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  // Auth modal popup opens automatically on startup if user is not authenticated
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('lookaway_authenticated') !== 'true';
+    } catch {
+      return true;
+    }
+  });
+
   const [engagements, setEngagements] = useState<EngagementRecord[]>(() => {
     try {
       const saved = localStorage.getItem('lookaway_engagements');
@@ -92,8 +111,51 @@ export default function App() {
     }
   }, [engagements]);
 
+  // Auth Handlers
+  const handleLogin = (profile: UserProfile) => {
+    setUser(profile);
+    setIsAuthenticated(true);
+    try {
+      localStorage.setItem('lookaway_authenticated', 'true');
+    } catch (e) {
+      console.error(e);
+    }
+    setIsAuthModalOpen(false);
+    if (currentStep === 'register') {
+      setCurrentStep('home');
+    }
+  };
+
+  const handleSignUp = (profile: UserProfile) => {
+    setUser(profile);
+    setIsAuthenticated(true);
+    try {
+      localStorage.setItem('lookaway_authenticated', 'true');
+    } catch (e) {
+      console.error(e);
+    }
+    setIsAuthModalOpen(false);
+    if (currentStep === 'register') {
+      setCurrentStep('home');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    try {
+      localStorage.removeItem('lookaway_authenticated');
+    } catch (e) {
+      console.error(e);
+    }
+    setIsAuthModalOpen(true);
+  };
+
   // Handlers for logging flow
   const handleStartLogging = () => {
+    if (!isAuthenticated) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setDraft(EMPTY_DRAFT);
     setCurrentStep('score');
   };
@@ -427,6 +489,7 @@ export default function App() {
             onResetSampleData={handleResetSampleData}
             onClearAllData={handleClearAllData}
             onImportData={handleImportData}
+            onLogout={handleLogout}
           />
         );
 
@@ -437,8 +500,16 @@ export default function App() {
 
   return (
     <div className="min-h-screen pb-20 sm:pb-24">
+      {/* Auth Modal Popup: Opens on start if not authenticated, or when switched from settings/header */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        currentUser={user}
+        onLogin={handleLogin}
+        onSignUp={handleSignUp}
+      />
+
       {/* App Container */}
-      <div className="w-full max-w-[1180px] mx-auto px-2.5 sm:px-6 py-2.5 sm:py-5">
+      <div className={`w-full max-w-[1180px] mx-auto px-2.5 sm:px-6 py-2.5 sm:py-5 transition-all duration-300 ${!isAuthenticated ? 'filter blur-[1px] pointer-events-none select-none opacity-80' : ''}`}>
         {/* Header */}
         <Header
           user={user}
@@ -447,6 +518,9 @@ export default function App() {
           onSetViewMode={setViewMode}
           onNavigate={(step) => setCurrentStep(step)}
           streakDays={7}
+          isAuthenticated={isAuthenticated}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onLogout={handleLogout}
         />
 
         {/* View Mode Switching */}
