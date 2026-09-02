@@ -7,7 +7,17 @@ interface LionCrestProps {
 }
 
 export function LionCrest({ size = 58, className = '', glow = false }: LionCrestProps) {
+  const [imgSrc, setImgSrc] = useState('/Logo+lookaway.png');
   const [imgError, setImgError] = useState(false);
+
+  const handleError = () => {
+    if (imgSrc === '/Logo+lookaway.png') {
+      // Try fallback path in public/assets if needed
+      setImgSrc('/assets/Logo_main.png');
+    } else {
+      setImgError(true);
+    }
+  };
 
   if (imgError) {
     // Fallback SVG if image is ever missing
@@ -49,13 +59,13 @@ export function LionCrest({ size = 58, className = '', glow = false }: LionCrest
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center select-none shrink-0 ${className}`}
+      className={`relative inline-flex items-center justify-center select-none shrink-0 ${glow ? 'filter drop-shadow-[0_0_12px_rgba(241,202,99,0.35)]' : ''} ${className}`}
       style={{ width: size, height: size }}
     >
       <img
-        src="/assets/Logo_main.png"
-        alt="Logo"
-        onError={() => setImgError(true)}
+        src={imgSrc}
+        alt="Look Away Logo"
+        onError={handleError}
         referrerPolicy="no-referrer"
         className="w-full h-full object-contain pointer-events-none"
         style={{
@@ -70,17 +80,26 @@ export function LionCrest({ size = 58, className = '', glow = false }: LionCrest
 export const MainLogo = LionCrest;
 
 export function HeroSilhouette() {
+  const [imgSrc, setImgSrc] = useState('/Logo+lookaway.png');
   const [imgError, setImgError] = useState(false);
+
+  const handleError = () => {
+    if (imgSrc === '/Logo+lookaway.png') {
+      setImgSrc('/assets/Logo_main.png');
+    } else {
+      setImgError(true);
+    }
+  };
 
   return (
     <div className="relative w-full py-3 sm:py-4 flex items-center justify-center select-none">
       {!imgError ? (
         <img
-          src="/assets/Logo_main.png"
-          alt="Hero"
-          onError={() => setImgError(true)}
+          src={imgSrc}
+          alt="Look Away Main Logo"
+          onError={handleError}
           referrerPolicy="no-referrer"
-          className="h-36 sm:h-48 w-auto object-contain max-w-full pointer-events-none"
+          className="h-36 sm:h-48 w-auto object-contain max-w-full pointer-events-none drop-shadow-[0_0_20px_rgba(241,202,99,0.25)]"
         />
       ) : (
         <LionCrest size={100} glow={false} />
